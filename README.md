@@ -40,18 +40,25 @@ datetime: For working with dates and times.
 These packages are installed in your Python environment before running the code.
 #
 
-Dataset
-The code loads historical stock price data from a CSV file named World_Stock_Prices.csv. It contains various stock tickers along with corresponding price data (Open, Close, High, Low).
+# Dataset
+The code loads historical stock price data from a CSV file named World_Stock_Prices.csv. 
+
+It contains various stock tickers along with corresponding price data (Open, Close, High, Low).
 
 Load Data: The pd.read_csv function is used to load the dataset into a DataFrame named stock_data.
+
 Convert Date to Datetime: The pd.to_datetime function converts the 'Date' column to a datetime format for easier manipulation.
+
 Filter Specific Tickers: The code selects a subset of stock tickers from interested_tickers.
 
-
+#
 ## Loading the dataset into the stock_data data frame
+```
 stock_data = pd.read_csv("World_Stock_Prices.csv")
-
 stock_data['Date'] = pd.to_datetime(stock_data['Date'])
+```
+#
+
 
 # Focus on specific tickers
 interested_tickers = ['BAMXF', 'AAPL', 'AMZN', 'NFLX', 'ZI', 'JPM', 'AXP', 'FDX', 'MCD']
