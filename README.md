@@ -1,14 +1,46 @@
-# AIT-Final-Project-Sai-Surya-Gadiraju
+# AIT-Final-Project-Sai-Surya-Gadiraju-Team-3
 
+### This README file provides an explanation of the code used to forecast stock prices for specific tickers using the ARIMA (AutoRegressive Integrated Moving Average) model. The project imports historical stock price data, scales the data, fits ARIMA models to predict future prices, and saves the forecast results to a CSV file.
 
+## Table of Contents
+1. [Introduction](#introduction)
+2. [Dependencies](#dependencies)
+3. [Dataset](#dataset)
+4. [Data Processing](#data-processing)
+5. [ARIMA Model](#arima-model)
+6. [Forecasting](#forecasting)
+7. [Output](#output)
+8. [Usage](#usage)
+
+## Introduction
+This project aims to forecast stock prices for specific companies over a given period using the ARIMA model. The predictions are made for a week ahead, based on existing stock price data.
+
+## Dependencies
+The following Python libraries are used in this project:
+
+#
+```
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from statsmodels.tsa.arima.model import ARIMA
 from datetime import datetime, timedelta
 
-# Load your dataset
+```
+pandas: For data manipulation and analysis.
+numpy: For numerical operations.
+sklearn.preprocessing.MinMaxScaler: For data scaling.
+statsmodels.tsa.arima.model.ARIMA: For ARIMA modeling.
+datetime: For working with dates and times.
+These packages are installed in your Python environment before running the code.
+
+
+
+
+
+## Loading the dataset into the stock_data data frame
 stock_data = pd.read_csv("World_Stock_Prices.csv")
+
 stock_data['Date'] = pd.to_datetime(stock_data['Date'])
 
 # Focus on specific tickers
