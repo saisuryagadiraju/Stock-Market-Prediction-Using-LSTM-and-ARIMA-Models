@@ -1,5 +1,142 @@
 # AIT-Final-Project-Sai-Surya-Gadiraju-Team-3
 
+## Expolatory Data Analysis
+
+The exploratory data analysis (EDA) performed on a dataset of world stock prices. The EDA aims to understand the dataset's structure, summarize key characteristics, and identify trends in stock prices by country and industry.
+
+### Table of Contents
+Data Loading
+Initial Data Exploration
+Data Conversion and Cleaning
+Industry-Level Analysis
+Country-Level Analysis and Visualization
+Results and Observations
+
+## Data Loading
+The first step is to load the dataset and ensure it has been imported correctly. The data is loaded into a Pandas DataFrame from a CSV file named "World_Stock_Prices.csv".
+```
+import pandas as pd
+stock_data = pd.read_csv("World_Stock_Prices.csv")
+# Display the first few rows to check the data structure
+stock_data.head()
+```
+# 
+
+## Initial Data Exploration
+Once the data is loaded, it's important to get an overview of its structure. This includes checking the data types of each column, identifying missing values, and summarizing key statistics.
+
+```
+# Display information about the DataFrame
+stock_data.info()
+
+# Summary statistics for numerical columns
+stock_data.describe()
+```
+#
+
+## Data Conversion and Cleaning
+
+The 'Date' column is converted to a datetime format to enable time-based operations and sorting. 
+
+This step ensures consistency when working with time-series data.
+```
+# Convert 'Date' to datetime
+stock_data['Date'] = pd.to_datetime(stock_data['Date'])
+# Display DataFrame information to confirm the data type conversion
+stock_data.info()
+```
+## Industry-Level Analysis
+
+To understand stock prices at the industry level, the data is grouped by 'Industry_Tag' and the mean 'Open' and 'Close' prices are calculated. This allows for comparisons between different industries.
+
+```
+# Calculate average 'Open' and 'Close' prices by industry
+industry_analysis_open = stock_data.groupby('Industry_Tag').agg({'Open': 'mean'})
+industry_analysis_close = stock_data.groupby('Industry_Tag').agg({'Close': 'mean'})
+
+# Rename columns for clarity
+industry_analysis_open.rename(columns={'Open': 'Average_Open'}, inplace=True)
+industry_analysis_close.rename(columns={'Close': 'Average_Close'}, inplace=True)
+
+# Sort industries by 'Average_Open' and 'Average_Close'
+top_open_industries = industry_analysis_open.sort_values(by='Average_Open', ascending=False)
+top_close_industries = industry_analysis_close.sort_values(by='Average_Close', ascending=False)
+```
+#
+## Observations on Industry Analysis
+This analysis reveals which industries tend to have higher 'Open' and 'Close' prices. 
+The sorted DataFrames, top_open_industries and top_close_industries, provide this information.
+
+```
+print("Top industries by average 'Open' price:")
+print(top_open_industries)
+
+print("Top industries by average 'Close' price:")
+print(top_close_industries)
+```
+#
+## Country-Level Analysis and Visualization
+
+To explore stock price trends by country, the data is grouped by 'Date' and 'Country' to calculate the mean 'Open' and 'Close' prices. 
+This section uses Plotly to visualize trends over time. Its an interactive graph
+
+```
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+
+# Group the data by date and country and calculate mean 'Open' and 'Close' prices
+country_mean_price = stock_data.groupby(['Date', 'Country']).agg({'Open': 'mean', 'Close': 'mean'}).reset_index()
+
+# Create a Plotly figure for visualization
+fig = go.Figure()
+
+# Add traces for 'Open' and 'Close' prices for each country
+for country in country_mean_price['Country'].unique():
+    country_data = country_mean_price[country_mean_price['Country'] == country]
+
+    # Add a trace for 'Close' prices
+    fig.add_trace(go.Scatter(
+        x=country_data['Date'],
+        y=country_data['Close'],
+        mode='lines+markers',  # Line plot with markers
+        name=f"{country} - Close",
+        hoverinfo='x+y+text'  # Tooltip configuration
+    ))
+    
+    # Add a trace for 'Open' prices
+    fig.add_trace(go.Scatter(
+        x=country_data['Date'],
+        y=country_data['Open'],
+        mode='lines+markers',  # Line plot with markers
+        name=f"{country} - Open",
+        hoverinfo='x+y+text'  # Tooltip configuration
+    ))
+
+# Update layout with titles and axis labels
+fig.update_layout(
+    title="Stock Price Trends with Open/Close by Country",
+    xaxis_title="Date",
+    yaxis_title="Stock Price",
+    legend_title="Country - Open/Close"
+)
+
+# Display the plot
+fig.show()
+```
+
+## Observations on Country-Level Analysis
+#
+The visualization shows stock price trends over time, with separate lines for 'Open' and 'Close' prices for each country. This analysis helps to identify patterns or anomalies in stock prices across different countries.
+
+## Results and Observations
+
+Through this EDA, several key insights are gained:
+
+Certain industries have higher average 'Open' and 'Close' prices.
+
+There are variations in stock price trends among different countries, with distinct patterns over time.
+#
+
 ### This README file provides an explanation of the code used to forecast stock prices for specific tickers using the ARIMA (AutoRegressive Integrated Moving Average) model. The project imports historical stock price data, scales the data, fits ARIMA models to predict future prices, and saves the forecast results to a CSV file.
 
 
