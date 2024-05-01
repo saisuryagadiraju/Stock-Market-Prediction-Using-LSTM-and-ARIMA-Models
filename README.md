@@ -132,7 +132,8 @@ After applying the scaling, the code prints summary statistics for the scaled da
 ```
 #
 
-##ARIMA Model Forecasting Function
+# ARIMA Model Forecasting Function
+#
 A function named forecast_next_7_days_from_date is defined to forecast the next 7 days from a given ARIMA model and start date. The function does the following:
 
 * Forecast for 7 Days: Uses the ARIMA model to predict the next 7 days.
@@ -154,5 +155,108 @@ def forecast_next_7_days_from_date(model, start_date):
     forecast_df['Low'] = forecast_df['Close'] - 10  
     return forecast_df
 ```
+#
 
+## Define the Stock Tickers
 
+A list of top 10 stock tickers is defined to determine which stocks will be forecasted. This list includes common high-volume stocks:
+```
+top_10_tickers = ["CMG", "NFLX", "ADBE", "COST", "ZM", "NVDA", "MA", "TSLA", "HD", "SPOT"]
+```
+* The current date is obtained to serve as the starting point for forecasting:
+```
+current_date = datetime.now().date()
+```
+
+## Forecasting Loop
+
+A list named all_forecasts is created to store forecast results for each stock ticker. The code then loops through each stock ticker, 
+fitting an ARIMA model to the 'Close' price, and uses the forecast_next_7_days_from_date function to forecast the next 7 days. Here's a breakdown of what happens in this loop:
+
+* Filter Data by Ticker: Only select data for the current ticker.
+* Sort Data by Date: Ensure the data is sorted chronologically.
+* Fit ARIMA Model: Use an ARIMA order of (7, 2, 1) to fit the model.
+* Forecast for 7 Days: Forecast the next 7 days from the current date.
+* Add Ticker Information: Add the stock ticker to the forecast DataFrame.
+* Store the Forecast: Append the forecast DataFrame to the all_forecasts list.
+
+```
+  all_forecasts = []
+
+for ticker in top_10_tickers:
+    stock_ticker_data = stock_data[stock_data['Ticker'] == ticker]
+    stock_ticker_data = stock_ticker_data.sort_values(by='Date')
+    
+    arima_order = (7, 2, 1)  # Example order, can be adjusted
+    model = ARIMA(stock_ticker_data['Close'], order=arima_order)
+    arima_fit = model.fit()
+    
+    forecast_df = forecast_next_7_days_from_date(arima_fit, current_date)
+    forecast_df['Ticker'] = ticker
+    
+    all_forecasts.append(forecast_df)
+```
+#
+After completing the loop, the code concatenates all forecasts into a single DataFrame, final_forecasts, for easy analysis:
+
+```
+final_forecasts = pd.concat(all_forecasts, ignore_index=True)
+```
+## Display the Final Forecast
+
+Finally, the code prints the final forecast, displaying the results for each of the top 10 stock tickers over the 7-day forecast period:
+#
+
+```
+print("7-Day Forecast for the Top 10 Stocks:")
+print(final_forecasts)
+```
+#
+
+### Grouping by Ticker
+
+The code starts by creating a dictionary called ticker_forecasts to hold individual DataFrames for each stock ticker. It then groups the final_forecasts DataFrame by 'Ticker' to extract forecasts for each specific stock.
+
+ticker_forecasts = {}
+```
+# Group the final forecasts by 'Ticker'
+grouped_forecasts = final_forecasts.groupby('Ticker')
+```
+### Looping Through Groups to Store Individual DataFrames
+The code loops through the grouped data to store the forecasts for each ticker in the ticker_forecasts dictionary. This allows for easy retrieval of forecasted data by stock ticker.
+
+```
+for ticker, group in grouped_forecasts:
+    # Store the DataFrame for each ticker in the dictionary
+    ticker_forecasts[ticker] = group
+```
+
+#
+```
+# Display the forecasted data for each stock ticker
+for ticker, forecast_df in ticker_forecasts.items():
+    print(f"Forecasted Data for {ticker}:")
+    print(forecast_df)
+```
+## Plotting the Forecasted Data
+
+To visualize the forecasted data, the code uses matplotlib.pyplot to plot the forecasted 'Close' prices over a 7-day period. This helps in understanding trends and comparing forecasted data among different stock tickers.
+
+```
+import matplotlib.pyplot as plt
+
+# Plotting the forecast for each stock ticker
+for ticker, forecast_df in ticker_forecasts.items():
+    plt.plot(forecast_df['Date'], forecast_df['Close'], label=ticker)  # Plot 'Close' price over time
+    plt.title(f"7-Day Forecast for {ticker}")  # Add a title
+    plt.xlabel("Date")  # Label the x-axis
+    plt.ylabel("Closing Price")  # Label the y-axis
+    plt.gca().xaxis.set_tick_params(rotation=30, labelsize=10)  # Rotate x-axis labels for better readability
+    plt.legend()  # Add a legend
+    plt.show()  # Display the plot
+```
+#
+
+* Plot 'Close' Price: Plots the 'Close' price over the forecasted period for each stock ticker.
+* Plot Formatting: Adds a title, labels for the x- and y-axes, and adjusts the rotation of the x-axis labels for better readability.
+* Display the Plot: Calls plt.show() to render the plot, allowing visualization of the forecasted data.
