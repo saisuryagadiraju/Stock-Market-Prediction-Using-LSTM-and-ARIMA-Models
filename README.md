@@ -25,17 +25,27 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from statsmodels.tsa.arima.model import ARIMA
 from datetime import datetime, timedelta
-
 ```
+#
 pandas: For data manipulation and analysis.
+
 numpy: For numerical operations.
+
 sklearn.preprocessing.MinMaxScaler: For data scaling.
+
 statsmodels.tsa.arima.model.ARIMA: For ARIMA modeling.
+
 datetime: For working with dates and times.
+
 These packages are installed in your Python environment before running the code.
+#
 
+Dataset
+The code loads historical stock price data from a CSV file named World_Stock_Prices.csv. It contains various stock tickers along with corresponding price data (Open, Close, High, Low).
 
-
+Load Data: The pd.read_csv function is used to load the dataset into a DataFrame named stock_data.
+Convert Date to Datetime: The pd.to_datetime function converts the 'Date' column to a datetime format for easier manipulation.
+Filter Specific Tickers: The code selects a subset of stock tickers from interested_tickers.
 
 
 ## Loading the dataset into the stock_data data frame
