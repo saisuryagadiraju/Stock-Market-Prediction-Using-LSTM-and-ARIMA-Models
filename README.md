@@ -296,6 +296,131 @@ scaled_stock_data.select("Date", "Scaled_Open", "Scaled_Close", "Scaled_High", "
 The select method selects specific columns to display, and the show method displays the first few rows of the selected data. This is useful for verifying that the scaled data has been created and formatted correctly.
 
 
+### Setting Up the Environment
+First, the necessary libraries are imported, including TensorFlow for building the LSTM model and scikit-learn for data preprocessing.
+
+```
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense, Dropout
+from tensorflow.keras.regularizers import l2
+from sklearn.preprocessing import MinMaxScaler
+TensorFlow provides the tools to build and train neural networks, while MinMaxScaler from scikit-learn is used to normalize data.
+```
+
+### Converting Spark DataFrame to Pandas DataFrame
+The code converts the Spark DataFrame (scaled_stock_data) to a Pandas DataFrame for further processing and analysis.
+
+```
+# Convert Spark DataFrame to Pandas DataFrame
+pandas_df = scaled_stock_data.toPandas()
+```
+
+Converting to Pandas allows the code to use additional data manipulation and analysis tools before building the LSTM model.
+
+### Adding a Simple Moving Average (SMA) Feature
+A simple moving average with a 10-day window is added as a new feature to capture short-term trends in the stock prices. This is a common feature used in stock price analysis.
+
+```
+# Add a simple moving average (SMA) feature with a 10-day window
+pandas_df['SMA_10'] = pandas_df['Close'].rolling(window=10).mean()
+pandas_df.dropna(inplace=True)# Drop rows with NaN values 
+```
+The rolling(window=10).mean() method calculates the 10-day moving average, and dropna() removes rows with NaN values resulting from the moving average calculation.
+
+### Creating Input Sequences for LSTM
+To use LSTM, the data needs to be converted into sequences, where each sequence consists of a specified number of time steps. The code defines a function to create these sequences for training and testing the LSTM model.
+
+```
+# Function to create input sequences for LSTM
+def create_sequences(data, n_steps):
+    X, y = [], []
+    for i in range(n_steps, len(data)):
+        X.append(data[i - n_steps:i])
+        y.append(data[i, :4])  # Predict Open, Close, High, Low
+    return np.array(X), np.array(y)
+```
+
+n_steps specifies the number of time steps in each sequence.
+X contains the input sequences, while y contains the corresponding target values.
+y captures the original 'Open', 'Close', 'High', and 'Low' values, which are used as targets for the LSTM model.
+
+### Selecting and Scaling Features for LSTM
+The code selects the features to be used for LSTM and scales them using MinMaxScaler to ensure consistent input data. Scaling normalizes the data to a specific range (typically 0 to 1).
+
+```
+# Select and scale features and targets for LSTM
+features = ['Scaled_Open', 'Scaled_Close', 'Scaled_High', 'Scaled_Low', 'SMA_10']
+targets = ['Open', 'Close', 'High', 'Low']
+all_columns = features + targets
+
+scaler = MinMaxScaler(feature_range=(0, 1))
+data = scaler.fit_transform(pandas_df[all_columns])
+```
+The selected features include the scaled 'Open', 'Close', 'High', and 'Low' prices, along with the 'SMA_10'.
+The targets are the original 'Open', 'Close', 'High', and 'Low' values.
+The fit_transform() method scales the data based on the defined feature range.
+
+### Creating Sequences for LSTM
+After scaling the data, the code creates sequences with a specified number of time steps. These sequences are used to train and test the LSTM model.
+
+```
+# Create sequences with a specified number of steps
+n_steps = 5
+X, y = create_sequences(data, n_steps)
+```
+n_steps is set to 5, meaning each sequence consists of 5 time steps.
+X contains the input sequences, and y contains the corresponding target values.
+
+### Splitting the Data into Training and Testing Sets
+The code splits the sequences into training and testing sets, typically using an 80/20 split, to train and evaluate the LSTM model.
+
+```
+# Split the data into training and testing sets
+train_size = int(0.8 * len(X))
+X_train, X_test = X[:train_size], X[train_size:]
+y_train, y_test = y[:train_size], y[train_size:]
+```
+train_size determines the number of sequences to be used for training.
+X_train and y_train contain the training data.
+X_test and y_test contain the testing data.
+
+### Building and Training the LSTM Model
+This section builds the LSTM model with regularization and dropout to prevent overfitting. The architecture includes two LSTM layers with different configurations.
+
+```
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense, Dropout
+from tensorflow.keras.regularizers import l2
+
+# Build an LSTM model with regularization and dropout
+model = Sequential([
+    LSTM(100, return_sequences=True, activation='relu', input_shape=(n_steps, X.shape[2]), kernel_regularizer=l2(0.01)),
+    Dropout(0.3),
+    LSTM(50, activation='relu', kernel_regularizer=l2(0.01)),
+    Dropout(0.3),
+    Dense(4)  # Predict Open, Close, High, Low
+])
+
+# Compile the model with Adam optimizer and Mean Squared Error (MSE) loss
+model.compile(optimizer='adam', loss='mse')
+```
+
+The LSTM model has two LSTM layers: the first with 100 units, returning sequences, and the second with 50 units.
+Dropout is used after each LSTM layer to reduce overfitting.
+The model ends with a Dense layer with 4 outputs (predicting 'Open', 'Close', 'High', and 'Low').
+The model is compiled with the Adam optimizer and Mean Squared Error (MSE) loss function.
+The code trains the LSTM model using the training data and includes a validation split for monitoring during training.
+
+```
+# Train the LSTM model with a validation split for monitoring
+model.fit(X_train, y_train, epochs=50, batch_size=32, validation_split=0.1, verbose=1)
+
+```
+epochs=50 means the model is trained for 50 epochs.
+batch_size=32 specifies the batch size for training.
+validation_split=0.1 uses 10% of the training data for validation to monitor training progress.
+verbose=1 provides detailed training output.
+
 
 
 #
