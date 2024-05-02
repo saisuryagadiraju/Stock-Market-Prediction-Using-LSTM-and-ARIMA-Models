@@ -137,6 +137,168 @@ Certain industries have higher average 'Open' and 'Close' prices.
 There are variations in stock price trends among different countries, with distinct patterns over time.
 #
 
+## Stock Price Analysis with PySpark and LSTM
+### This README explains the code that analyzes stock price data using PySpark, applies exploratory data analysis (EDA), transforms and scales the data, and builds a Long Short-Term Memory (LSTM) model for stock price forecasting. It also covers model training, evaluation, and visualization of the results.
+
+## Introduction
+
+This project analyzes stock price data and uses an LSTM model to forecast stock prices. It employs PySpark for data processing and transformation, and TensorFlow/Keras, Hyper parameter tunning for building the LSTM model. The project involves exploratory data analysis, data transformation, stock data scaling, and LSTM-based forecasting.
+
+## Dependencies
+To run this code, ensure the following Python libraries are installed:
+
+pyspark: For Spark-based data processing.
+
+pandas: For data manipulation.
+
+seaborn: For data visualization.
+
+matplotlib: For plotting.
+
+tensorflow: For building and training LSTM models.
+
+sklearn: For data preprocessing and additional metrics.
+
+``
+pip install pyspark pandas seaborn matplotlib tensorflow sklearn
+``
+
+### Data Loading and Exploration
+The code starts by creating a Spark session and loading stock price data from a CSV file into a PySpark DataFrame. It then performs initial data exploration to understand the data's structure, including basic statistics and data types.
+
+```
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, to_date
+
+# Create a Spark session
+spark = SparkSession.builder.appName("StockDataAnalysis").getOrCreate()
+
+# Load the stock price data from CSV
+stock_data = spark.read.csv("dbfs:/FileStore/shared_uploads/sgadira3@gmu.edu/World_Stock_Prices-2.csv", header=True, inferSchema=True)
+
+# Display the first few rows of the DataFrame
+stock_data.head()
+
+# Show summary statistics for the data
+summary_stats = stock_data.describe()
+summary_stats.display()
+```
+## Data Transformation and Rounding
+The code applies transformations to round numerical columns to a consistent format, which helps with data normalization and later processing. It also creates a scatter plot to visualize the relationship between 'Open' and 'Close' prices.
+
+```
+import pyspark.sql.functions as F
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Round 'Open', 'High', 'Low', and 'Close' columns to 2 decimal places
+stock_data = stock_data.withColumn("Open", F.round(F.col("Open"), 2))
+stock_data = stock_data.withColumn("High", F.round(F.col("High"), 2))
+stock_data = stock_data.withColumn("Low", F.round(F.col("Low"), 2))
+stock_data = stock_data.withColumn("Close", F.round(F.col("Close"), 2))
+
+# Display the data to ensure rounding is applied correctly
+stock_data.display(10)
+
+# Create a scatter plot to visualize 'Close' vs. 'Open'
+sns.scatterplot(data=stock_data.toPandas(), x='Close', y='Open')
+plt.xlabel("Stock Close Price")
+plt.ylabel("Stock Open Price")
+plt.title("Scatter Plot of Stock Close Price vs. Open")
+plt.show()
+```
+
+
+## Stock Data Scaling with PySpark
+To ensure data consistency, MinMaxScaler is used to scale the stock price data to a range between 0 and 1. This section also introduces transformations with dense vectors and extracts components from those vectors.
+
+### Setting Up a Spark Session
+The code starts by initializing a Spark session, which is the entry point to working with Spark. The appName parameter specifies the name of the application.
+
+```
+from pyspark.sql import SparkSession
+# Create a Spark session for scaling
+spark = SparkSession.builder.appName("StockScaling").getOrCreate()
+```
+
+* A Spark session is necessary for interacting with Spark functionalities, including DataFrames and machine learning operations.
+
+### Filtering Data by Date Range
+The data is filtered to include only the rows between January 1, 2019, and December 31, 2023. This step helps focus the analysis on a specific time period.
+
+```
+from pyspark.sql.functions import col
+
+# Filter data between 2019 and 2023 for analysis
+stock_filtered = stock_data.filter((col("Date") >= "2019-01-01") & (col("Date") <= "2023-12-31"))
+```
+
+This step uses the filter method with conditions applied to the 'Date' column. The col function is used to refer to DataFrame columns in PySpark.
+
+
+### Creating Dense Vectors for Stock Features
+A user-defined function (UDF) is defined to create dense vectors from 'Open', 'Close', 'High', and 'Low' columns. Dense vectors are commonly used in machine learning operations with Spark.
+
+```
+from pyspark.sql.functions import udf
+from pyspark.ml.linalg import Vectors, VectorUDT
+
+# Create dense vectors from 'Open', 'Close', 'High', 'Low'
+to_vector = udf(lambda a, b, c, d: Vectors.dense([a, b, c, d]), VectorUDT())
+stock_filtered = stock_filtered.withColumn("features", to_vector("Open", "Close", "High", "Low"))
+
+```
+
+The to_vector UDF converts the 'Open', 'Close', 'High', and 'Low' columns into a dense vector. This is useful for applying machine learning operations, such as scaling and modeling.
+
+
+
+### Applying MinMaxScaler to Normalize Data
+MinMaxScaler is used to normalize the data by scaling it to a specified range (default is 0 to 1). This step is important for ensuring consistent data for machine learning models.
+
+```
+from pyspark.ml.feature import MinMaxScaler
+
+# Initialize MinMaxScaler and fit to the filtered data
+scaler = MinMaxScaler(inputCol="features", outputCol="scaled_features")
+scaler_model = scaler.fit(stock_filtered)
+scaled_stock_data = scaler_model.transform(stock_filtered)
+
+```
+The MinMaxScaler is initialized with the input and output columns specified. The scaler is then fit to the filtered data to calculate the scaling parameters. The transform method applies the scaling to create the scaled_stock_data DataFrame, which contains the normalized data.
+
+### Extracting Components from Dense Vectors
+To work with the scaled data, a UDF is used to extract individual components from the dense vector. This step creates new columns for the scaled 'Open', 'Close', 'High', and 'Low' values.
+
+```
+from pyspark.sql.functions import lit
+
+# UDF to extract components from the dense vector
+extract_element = udf(lambda v, i: float(v[i]), FloatType())
+
+# Apply UDF to extract 'Scaled_Open', 'Scaled_Close', 'Scaled_High', and 'Scaled_Low'
+scaled_stock_data = scaled_stock_data.withColumn("Scaled_Open", extract_element("scaled_features", lit(0))) \
+    .withColumn("Scaled_Close", extract_element("scaled_features", lit(1))) \
+    .withColumn("Scaled_High", extract_element("scaled_features", lit(2))) \
+    .withColumn("Scaled_Low", extract_element("scaled_features", lit(3)))
+```
+
+The extract_element UDF takes a dense vector and an index and returns the corresponding value as a float. The lit function is used to pass a literal value to the UDF, specifying which component to extract. The withColumn method adds the new columns to the DataFrame.
+
+### Displaying the Scaled Stock Data
+The final step is to display the scaled stock data to verify that the transformations and scaling were applied correctly.
+
+```
+# Display the scaled stock data
+scaled_stock_data.select("Date", "Scaled_Open", "Scaled_Close", "Scaled_High", "Scaled_Low").show(5)
+```
+
+The select method selects specific columns to display, and the show method displays the first few rows of the selected data. This is useful for verifying that the scaled data has been created and formatted correctly.
+
+
+
+
+#
 This README file provides an explanation of the code used to forecast stock prices for specific tickers using the ARIMA (AutoRegressive Integrated Moving Average) model. The project imports historical stock price data, scales the data, fits ARIMA models to predict future prices, and saves the forecast results to a CSV file.
 
 
