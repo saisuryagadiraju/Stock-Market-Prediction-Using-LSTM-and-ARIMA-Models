@@ -421,6 +421,206 @@ batch_size=32 specifies the batch size for training.
 validation_split=0.1 uses 10% of the training data for validation to monitor training progress.
 verbose=1 provides detailed training output.
 
+### Model Evaluation on Test Data
+Model evaluation is the process of testing a trained model on unseen data to assess its performance. In this case, the code evaluates the LSTM model using the test dataset and calculates MSE and RMSE.
+
+```
+# Evaluate the model on the test data
+test_mse = model.evaluate(X_test, y_test, verbose=1)
+
+```
+The model.evaluate() function runs the model on the test data (X_test) and compares its predictions with the true values (y_test) to compute the loss, which is MSE in this case.
+verbose=1 provides output on the evaluation process, indicating the progress and the final result.
+
+##### Root Mean Squared Error (RMSE)
+RMSE is derived from MSE by taking its square root. It is useful because it is in the same unit as the target variable, making it easier to interpret.
+
+```
+# Calculate RMSE from MSE
+test_rmse = np.sqrt(test_mse)
+
+print("Test MSE:", test_mse)
+print("Test RMSE:", test_rmse) 
+```
+This step displays the test MSE and RMSE, giving an indication of the model's accuracy on the test dataset.
+A lower RMSE generally indicates better model performance, with smaller errors in predictions.
+#
+
+### Generating Predictions
+After training the LSTM model, predictions are generated using the test dataset. This step evaluates how well the model can forecast unseen data.
+
+```
+predictions = model.predict(X_test)
+```
+
+The model.predict() method is used to generate predictions from the LSTM model, using the test input data X_test.
+The output predictions contains the model's forecasts for the test set.
+
+Reshaping the Data
+The code reshapes the actual and predicted data to extract specific components, allowing for detailed evaluation.
+
+```
+# Reshape to extract specific components
+actual_prices = y_test.reshape(-1, 4)[:, 0]  
+predicted_prices = predictions.reshape(-1, 4)[:, 0]
+```
+y_test.reshape(-1, 4)[:, 0] reshapes y_test to get the first component (often representing 'Open' price). The same operation is applied to predictions.
+Reshaping is useful when the data is not in the desired format for comparison or analysis.
+
+Computing Mean Absolute Error (MAE)
+MAE is a common metric used to evaluate model accuracy. It measures the average absolute difference between predicted and actual values, providing an intuitive measure of prediction error.
+
+```
+from sklearn.metrics import mean_absolute_error
+# Calculate Mean Absolute Error (MAE)
+mae = mean_absolute_error(actual_prices, predicted_prices)
+```
+MAE is calculated using mean_absolute_error(actual_prices, predicted_prices).
+MAE is interpreted as the average absolute difference between predicted and actual values. A lower MAE indicates better model accuracy.
+
+The first step is to train the LSTM model using the training data (X_train, y_train). The validation_split parameter allows monitoring the model's performance on a subset of the training data not used for actual training, which provides a measure of how well the model generalizes to unseen data.
+
+python
+Download
+Copy code
+history = model.fit(X_train, y_train, epochs=10, batch_size=50, validation_split=0.1, verbose=1)
+epochs=10: Specifies that the model will be trained for 10 epochs (iterations through the entire training dataset).
+batch_size=50: Defines the number of samples processed before updating the model weights.
+validation_split=0.1: Uses 10% of the training data for validation to monitor the model's performance during training.
+verbose=1: Controls the amount of information displayed during training (1 provides detailed output).
+The model.fit() method returns a history object that contains information about the training process, including the loss for each epoch.
+
+#### Extracting Training and Validation Loss
+After training, the code extracts the training loss and validation loss from the history object. This data is used to plot the loss over epochs to evaluate the training process.
+
+```
+loss = history.history['loss']
+val_loss = history.history['val_loss']
+```
+loss: The training loss for each epoch.
+val_loss: The validation loss for each epoch.
+Loss typically refers to the value of the loss function (in this case, Mean Squared Error), which is used to measure how well the model is learning.
+
+### Hyperparameter Tuning with a Parameter Grid
+The code defines a grid of hyperparameters to iterate over, allowing you to find the optimal combination for the LSTM model.
+
+```
+param_grid = {
+    'lstm_units': [50, 100],
+    'dropout_rate': [0.2, 0.3, 0.4],
+    'batch_size': [32, 64]
+}
+```
+The grid includes possible values for:
+lstm_units: Number of units in the LSTM layer.
+dropout_rate: Fraction of the units to drop during training (prevents overfitting).
+batch_size: Number of samples processed at a time during training.
+
+
+### Creating an LSTM Model with Hyperparameters
+A function is defined to create an LSTM model using the specified hyperparameters.
+
+```
+def create_lstm_model(lstm_units, dropout_rate):
+    model = Sequential([
+        LSTM(lstm_units, return_sequences=True, activation='relu', input_shape=(n_steps, X_train.shape[2])),
+        Dropout(dropout_rate),
+        LSTM(lstm_units // 2, activation='relu'),
+        Dropout(dropout_rate),
+        Dense(4)  # Output for Open, Close, High, Low
+    ])
+    model.compile(optimizer='adam', loss='mse')
+    return model
+```
+The LSTM model has two layers, with the first layer using the specified lstm_units and the second layer having half as many units.
+The Dropout layers use the specified dropout_rate to reduce overfitting.
+The Dense layer outputs 4 values, corresponding to Open, Close, High, and Low stock prices.
+The model is compiled with the Adam optimizer and MSE loss function.
+
+### Iterating Over Hyperparameters and Training the Model
+The code iterates over the hyperparameter grid and trains an LSTM model for each combination of lstm_units, dropout_rate, and batch_size.
+
+```
+results = []
+for lstm_units in param_grid['lstm_units']:
+    for dropout_rate in param_grid['dropout_rate']:
+        model = create_lstm_model(lstm_units, dropout_rate)
+        model.fit(X_train, y_train, epochs=10, batch_size=32, validation_split=0.1, verbose=1)
+        mse = model.evaluate(X_test, y_test)
+        results.append({'lstm_units': lstm_units, 'dropout_rate': dropout_rate, 'mse': mse})
+```
+The code trains each LSTM model for 10 epochs, with a validation split to monitor overfitting.
+After training, the model is evaluated using the test data to obtain the MSE.
+The results, including lstm_units, dropout_rate, and the computed mse, are stored in a list for comparison.
+
+### Finding the Best Hyperparameters
+A custom function is used to find the best hyperparameters by comparing the MSE of each model. The minimum MSE is identified to determine the optimal combination of hyperparameters.
+
+```
+def custom_min(results):
+    if not results:
+        return None
+    min_result = results[0]
+    for result in results[1:]:
+        if result['mse'] < min_result['mse']:
+            min_result = result
+    return min_result
+
+best_result = custom_min(results)
+print("Best Hyperparameters:", best_result)
+```
+custom_min() iterates over the results list to find the entry with the lowest MSE.
+The best result is displayed to identify the optimal hyperparameters.
+### Retraining the Best Model
+Using the best hyperparameters, the code retrains the LSTM model and evaluates it on the test data.
+
+```
+best_lstm_units = best_result['lstm_units']
+best_dropout_rate = best_result['dropout_rate']
+
+best_model = create_lstm_model(best_lstm_units, best_dropout_rate)
+
+best_model.fit(X, y, epochs=10, batch_size=50, verbose=1)
+
+test_loss = best_model.evaluate(X_test, y_test)
+print("Test Loss:", test_loss)
+```
+The best model is retrained using the entire dataset (X, y) for the specified number of epochs and batch size.
+The test loss is evaluated to check how well the model performs with the best hyperparameters.
+
+### Additional Metrics and Predictions
+Finally, the code generates predictions and calculates additional metrics like MSE, RMSE, and MAE to assess the model's accuracy.
+
+```
+predictions = best_model.predict(X_test)
+
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+
+# Calculate MSE, RMSE, MAE
+mse = mean_squared_error(y_test, predictions)
+rmse = np.sqrt(mse)
+mae = mean_absolute_error(y_test, predictions)
+
+print("Mean Squared Error (MSE):", mse)
+print("Root Mean Squared Error (RMSE):", rmse)
+print("Mean Absolute Error (MAE):", mae)
+```
+The predictions are generated from the best model using the test data.
+mean_squared_error calculates MSE between the actual and predicted values.
+np.sqrt(mse) calculates RMSE, providing a more interpretable measure of error.
+mean_absolute_error computes MAE, indicating the average absolute error in the predictions.
+The results for MSE, RMSE, and MAE are displayed to evaluate the model's accuracy.
+#
+
+
+
+
+
+
+
+
+
+
 
 
 #
