@@ -952,14 +952,8 @@ After training, the code saves the final model to a specified path. This ensures
 ```
 
 final_model_path: Defines the file path for the final model, ensuring it includes the stock ticker's name for uniqueness.
+
 model.save(final_model_path): Saves the trained model to the specified file path. This includes the model's architecture, weights, and optimizer state.
-
-
-
-
-
-
-
 
 
 
@@ -1042,7 +1036,8 @@ pip install pandas sklearn
 ```
 
 ##Scaling Setup
-To scale the data, two different scalers are used: MinMaxScaler and StandardScaler. 
+To scale the data, two different scalers are used: MinMaxScaler and StandardScaler.
+
 MinMax scaling scales the data to a range (typically [0, 1]), while Standard scaling standardizes the data to have a mean of 0 and a standard deviation of 1.
 #
 ```
@@ -1081,7 +1076,8 @@ Explanation of Scaling Steps
 
 Copy the Data: Before applying any scaling, the code makes a copy of the original data to avoid modifying it directly.
 
-Fit and Transform: The scaler's fit_transform method is used to scale the data. 
+Fit and Transform: The scaler's fit_transform method is used to scale the data.
+
 This function first calculates the scaling parameters based on the data and then applies the transformation to the specified columns.
 
 Store Scaled Data: The scaled DataFrame is stored in the scaled_data dictionary for future reference.
@@ -1134,8 +1130,13 @@ current_date = datetime.now().date()
 
 ## Forecasting Loop
 
-A list named all_forecasts is created to store forecast results for each stock ticker. The code then loops through each stock ticker, 
-fitting an ARIMA model to the 'Close' price, and uses the forecast_next_7_days_from_date function to forecast the next 7 days. Here's a breakdown of what happens in this loop:
+A list named all_forecasts is created to store forecast results for each stock ticker.
+
+The code then loops through each stock ticker,
+
+fitting an ARIMA model to the 'Close' price, and uses the forecast_next_7_days_from_date function to forecast the next 7 days.
+
+Here's a breakdown of what happens in this loop:
 
 * Filter Data by Ticker: Only select data for the current ticker.
 * Sort Data by Date: Ensure the data is sorted chronologically.
@@ -1215,25 +1216,25 @@ for ticker, forecast_df in ticker_forecasts.items():
     plt.gca().xaxis.set_tick_params(rotation=30, labelsize=10)  # Rotate x-axis labels for better readability
     plt.legend()  # Add a legend
     plt.show()  # Display the plot
+    
 ```
 * Plot 'Close' Price: Plots the 'Close' price over the forecasted period for each stock ticker.
 * Plot Formatting: Adds a title, labels for the x- and y-axes, and adjusts the rotation of the x-axis labels for better readability.
 * Display the Plot: Calls plt.show() to render the plot, allowing visualization of the forecasted data.
+
+
+#
 #
 
-
-
-
-
-# SVM Model for Stock Price Prediction
+## SVM Model for Stock Price Prediction
 
 This Python script utilizes Support Vector Machine (SVM) models to predict stock price movements and analyze stock data.
 It employs the `yfinance` library to fetch historical stock data and `scikit-learn` for SVM model training and evaluation.
 
 ### Prerequisites
 
-- Python 3.x
-- Libraries: pandas, yfinance, scikit-learn, matplotlib
+ Python 3.x
+ Libraries: pandas, yfinance, scikit-learn, matplotlib
 
 ### Installation
 
@@ -1241,9 +1242,7 @@ It employs the `yfinance` library to fetch historical stock data and `scikit-lea
 2. Install required libraries using pip:
 
 ```
-
  pip install pandas yfinance scikit-learn matplotlib
- 
 ```
 
 ## Usage
@@ -1252,43 +1251,54 @@ It employs the `yfinance` library to fetch historical stock data and `scikit-lea
 
 Import necessary Python libraries including pandas, yfinance, scikit-learn, and matplotlib.
 
-2. **Define Top Company Symbols**
+2. Define Top Company Symbols
 
 Specify a list of top company symbols for which the SVM model will be applied.
 
-3. **Calculate Strategy Returns**
+3. Calculate Strategy Returns
 
-Function: `calculate_strategy_returns(symbol)`
+Function: `calculate_strategy_returns(symbol)
+
 Fetch historical stock data for the given symbol.
+
 Perform feature engineering by calculating price differences and binary labeling of price movements.
+
 Split the data into training and testing sets.
+
 Train an SVM model using the training data.
+
 Evaluate the model's accuracy, print classification report, and plot confusion matrix.
 
-4. **Predict Next Day Price Movement**
+4. Predict Next Day Price Movement
 
-Function: `predict_next_day_price(symbol)`
+Function: `predict_next_day_price(symbol)
+
 Fetch historical stock data for the given symbol.
+
 Feature engineering and data preparation similar to the previous step.
+
 Train an SVM model using all available data.
+
 Predict the price movement for the next day based on the latest data point.
+
 Print the prediction whether the price will go up or down.
 
-5. **Plot ROC Curve and Precision-Recall Curve**
+5. Plot ROC Curve and Precision-Recall Curve
 
-- Function: `plot_roc_and_pr_curves(model, X_test, y_test)`
-- Plot Receiver Operating Characteristic (ROC) curve and Precision-Recall curve for model evaluation.
-- Compute and visualize the area under the curves.
+* Function: `plot_roc_and_pr_curves(model, X_test, y_test)`
+* Plot Receiver Operating Characteristic (ROC) curve and Precision-Recall curve for model evaluation.
+* Compute and visualize the area under the curves.
 
-6. **Plot Feature Importance**
+6. Plot Feature Importance
 
-- Function: `plot_feature_importance(X, model)`
-- Plot the importance of features using permutation importance.
-- Visualize feature importance scores for the SVM model.
+*  Function: `plot_feature_importance(X, model)`
+* Plot the importance of features using permutation importance.
+* Visualize feature importance scores for the SVM model.
 
 ## Example Usage
 
 1. Specify the top company symbols in the `top_companies` list.
+
 2. Run the script to train SVM models, evaluate performance, and visualize results.
 
 ```
@@ -1299,6 +1309,8 @@ stock_data.head()
 stock_data.info()
 ```
 #
+```
+
     <class 'pandas.core.frame.DataFrame'>
     RangeIndex: 279753 entries, 0 to 279752
     Data columns (total 12 columns):
@@ -1318,7 +1330,8 @@ stock_data.info()
      11  Country       279753 non-null  object 
     dtypes: float64(6), int64(1), object(5)
     memory usage: 25.6+ MB
-
+```
+#
 ```
 stock_data.describe()
 
@@ -1336,9 +1349,12 @@ import matplotlib.pyplot as plt
 from sklearn.inspection import permutation_importance
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.metrics import roc_curve, auc, precision_recall_curve
+```
 
-# List of top company symbols
+#### List of top company symbols
+```
 top_companies = ['AAPL', 'NKE', 'COST', 'AMZN']
+```
 
 # Function to calculate and plot strategy returns for a given symbol
 def calculate_strategy_returns(symbol):
@@ -1389,10 +1405,12 @@ def calculate_strategy_returns(symbol):
 ```
 #
 ####  Loop through top company symbols and calculate strategy returns for each
+```
 for company_symbol in top_companies:
     calculate_strategy_returns(company_symbol)
-
+```
 #### Function to predict the price movement for the next day
+```
 def predict_next_day_price(symbol):
     # Fetch historical stock data
     stock_data = yf.download(symbol, start='2019-01-01', end='2023-09-20')
@@ -1424,12 +1442,15 @@ def predict_next_day_price(symbol):
         print(f"For {symbol}: Predicted price will go up tomorrow.")
     else:
         print(f"For {symbol}: Predicted price will go down tomorrow.")
-
-# Loop through top company symbols and predict the price movement for the next day
+```
+#### Loop through top company symbols and predict the price movement for the next day
+```
 for company_symbol in top_companies:
     predict_next_day_price(company_symbol)
+```
 
-# Function to plot ROC Curve and Precision-Recall Curve
+#### Function to plot ROC Curve and Precision-Recall Curve
+```
 def plot_roc_and_pr_curves(model, X_test, y_test):
     # Predict probabilities
     if isinstance(model, CalibratedClassifierCV):
@@ -1469,6 +1490,7 @@ def plot_roc_and_pr_curves(model, X_test, y_test):
 
     plt.tight_layout()
     plt.show()
+```
 
 #### Loop through top company symbols and plot ROC Curve and Precision-Recall Curve
 for company_symbol in top_companies:
@@ -1585,8 +1607,9 @@ for company_symbol in top_companies:
        macro avg       0.81      0.81      0.81       238
     weighted avg       0.81      0.81      0.81       238
 
+#
 
-# Web Scraping technique Yahoo Finance Most Active Stocks
+## Web Scraping technique Yahoo Finance Most Active Stocks
 
 This Python script scrapes data from Yahoo Finance's "Most Active" stocks page. It uses the `requests` library to fetch the HTML content of the webpage and the `BeautifulSoup` library to parse the HTML and extract relevant information.
 
@@ -1602,9 +1625,9 @@ The script starts with the initial URL of Yahoo Finance's "Most Active" page.
 
 It enters a while loop to scrape data from multiple pages until there are no more "Next" buttons to navigate. Inside the loop, it:
 
-- Scrapes data from the current page using the `scrape_yahoo_finance` function.
-- Finds all rows in the table and extracts data from each row, excluding the header row.
-- Checks for the presence of a "Next" button to determine whether to continue scraping the next page.
+*  Scrapes data from the current page using the `scrape_yahoo_finance` function.
+* Finds all rows in the table and extracts data from each row, excluding the header row.
+* Checks for the presence of a "Next" button to determine whether to continue scraping the next page.
 
 ## Data Storage
 
@@ -1643,8 +1666,10 @@ The filtered DataFrame is printed to the console.
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+```
 
-# Function to scrape data from Yahoo Finance
+#### Function to scrape data from Yahoo Finance
+```
 def scrape_yahoo_finance(url):
     # Define headers for user agent to mimic a browser
     headers = {
@@ -1657,12 +1682,15 @@ def scrape_yahoo_finance(url):
 ```
 
 #### Initial URL for Yahoo Finance's most active page
+```
 url = 'https://finance.yahoo.com/most-active?guce_referrer=aHR0cHM6Ly93d3cucGVycGxleGl0eS5haS8&guce_referrer_sig=AQAAAEpUE8Ie2uxufblRgzfbnoou7bhme0gn3VyN2h5YxM5VIp8UdIT_U0lYnrjYeB5AYsOVEpBaqwrkeaenS375N4rl9SpaGMCF1wI6QZG9NvsbO-A7csoTeNC2pfs7TNvhr28HmDmqBaBRwR6FpDGSMaQB1qQQ_h_rMiEsCsXlJ2Tc&offset=0&count=100'
+```
 
 ##### List to store all scraped data
 all_data = []
 
 # Loop to scrape data from multiple pages
+```
 while True:
     # Scrape data from the current page
     soup = scrape_yahoo_finance(url)
@@ -1683,8 +1711,10 @@ while True:
     else:
         # If "Next" button is not found, break out of the loop
         break
+```
 
-# Define column names for the DataFrame
+#### Define column names for the DataFrame
+```
 column_names = ['Symbol', 'Name', 'Price (Intraday)', 'Change', '% Change', 'Volume', 'Avg Vol (3 month)', 'Market Cap', 'PE Ratio (TTM)', '52 Week Range']
 
 # Create DataFrame from the scraped data
@@ -1698,26 +1728,25 @@ df.to_csv('Final_Web_Scrapping.csv', index=False)
 
 # Display the DataFrame
 print(df)
-
 ```
-# Read the CSV containing the list of tickers
+
+#### Read the CSV containing the list of tickers
 ticker_df = pd.read_csv("C:/Users/Varun/Desktop/AIT-614/Final_Project/World_Stock_Prices_1.csv")
 
-# Extract the tickers from the ticker_df
+#### Extract the tickers from the ticker_df
 tickers = ticker_df['Ticker'].tolist()
 
-# Filter the DataFrame to include only the rows where the ticker matches those in your list
+#### Filter the DataFrame to include only the rows where the ticker matches those in your list
 filtered_df = df[df['Symbol'].isin(tickers)]
 
-### a New file will be created with the necessary information
+#### a New file will be created with the necessary information
 # Save the filtered DataFrame to a CSV file
 filtered_df.to_csv('Final_Filtered_Web_Scrapping.csv', index=False)
 
-# Print the filtered DataFrame
+#### Print the filtered DataFrame
 print(filtered_df)
-```
 
-#### After getting the file we can load the this dataset into our database and we can repeat the machine learning the steps to predict the stock market prices.
+* After getting the file we can load the this dataset into our database and we can repeat the machine learning the steps to predict the stock market prices.
 
 
   
