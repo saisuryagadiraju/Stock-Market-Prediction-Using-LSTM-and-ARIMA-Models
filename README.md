@@ -1167,7 +1167,6 @@ After completing the loop, the code concatenates all forecasts into a single Dat
 final_forecasts = pd.concat(all_forecasts, ignore_index=True)
 ```
 ## Display the Final Forecast
-
 Finally, the code prints the final forecast, displaying the results for each of the top 10 stock tickers over the 7-day forecast period:
 #
 
@@ -1178,13 +1177,13 @@ print(final_forecasts)
 #
 
 ### Grouping by Ticker
-
 The code starts by creating a dictionary called ticker_forecasts to hold individual DataFrames for each stock ticker. It then groups the final_forecasts DataFrame by 'Ticker' to extract forecasts for each specific stock.
-
 ticker_forecasts = {}
+
 ```
 # Group the final forecasts by 'Ticker'
 grouped_forecasts = final_forecasts.groupby('Ticker')
+
 ```
 ### Looping Through Groups to Store Individual DataFrames
 The code loops through the grouped data to store the forecasts for each ticker in the ticker_forecasts dictionary. This allows for easy retrieval of forecasted data by stock ticker.
@@ -1203,12 +1202,10 @@ for ticker, forecast_df in ticker_forecasts.items():
     print(forecast_df)
 ```
 ## Plotting the Forecasted Data
-
 To visualize the forecasted data, the code uses matplotlib.pyplot to plot the forecasted 'Close' prices over a 7-day period. This helps in understanding trends and comparing forecasted data among different stock tickers.
 
 ```
 import matplotlib.pyplot as plt
-
 # Plotting the forecast for each stock ticker
 for ticker, forecast_df in ticker_forecasts.items():
     plt.plot(forecast_df['Date'], forecast_df['Close'], label=ticker)  # Plot 'Close' price over time
@@ -1219,12 +1216,10 @@ for ticker, forecast_df in ticker_forecasts.items():
     plt.legend()  # Add a legend
     plt.show()  # Display the plot
 ```
-#
-
 * Plot 'Close' Price: Plots the 'Close' price over the forecasted period for each stock ticker.
 * Plot Formatting: Adds a title, labels for the x- and y-axes, and adjusts the rotation of the x-axis labels for better readability.
 * Display the Plot: Calls plt.show() to render the plot, allowing visualization of the forecasted data.
-
+#
 
 
 
@@ -1298,25 +1293,9 @@ Print the prediction whether the price will go up or down.
 
 ```
 python svm_stock_prediction.py
-```
-
-```
 import pandas as pd
-```
-
-
-
-```
 stock_data=pd.read_csv("C:/Users/HP/Downloads/World_Stock_Prices 1.csv")
-```
-
-
-```
 stock_data.head()
-```
-
-
-```
 stock_data.info()
 ```
 #
@@ -1339,13 +1318,12 @@ stock_data.info()
      11  Country       279753 non-null  object 
     dtypes: float64(6), int64(1), object(5)
     memory usage: 25.6+ MB
-    
-#
 
 ```
 stock_data.describe()
-```
 
+```
+#
 
 ```
 ##SVM MODEL
@@ -1731,6 +1709,7 @@ tickers = ticker_df['Ticker'].tolist()
 # Filter the DataFrame to include only the rows where the ticker matches those in your list
 filtered_df = df[df['Symbol'].isin(tickers)]
 
+### a New file will be created with the necessary information
 # Save the filtered DataFrame to a CSV file
 filtered_df.to_csv('Final_Filtered_Web_Scrapping.csv', index=False)
 
@@ -1738,70 +1717,7 @@ filtered_df.to_csv('Final_Filtered_Web_Scrapping.csv', index=False)
 print(filtered_df)
 ```
 
-
-       Symbol                                Name Price (Intraday)  Change  \
-    0     NIO                            NIO Inc.             5.59   +0.32   
-    1    TSLA                         Tesla, Inc.           180.01   +0.02   
-    2    PARA                    Paramount Global            13.86   +1.60   
-    3    AAPL                          Apple Inc.           173.03   +3.73   
-    4    RIVN             Rivian Automotive, Inc.             9.83   +0.62   
-    ..    ...                                 ...              ...     ...   
-    95     MU             Micron Technology, Inc.           112.33   +2.63   
-    96   MRNA                       Moderna, Inc.           125.59  +14.13   
-    97      Z                  Zillow Group, Inc.            39.84   -2.05   
-    98    HPE  Hewlett Packard Enterprise Company            16.53   +0.09   
-    99   PYPL               PayPal Holdings, Inc.            66.98   +0.84   
-    
-       % Change   Volume Avg Vol (3 month) Market Cap PE Ratio (TTM)  
-    0    +6.07%  98.591M           53.393M    11.666B            N/A  
-    1    +0.01%  88.285M          103.076M   574.088B          46.04  
-    2   +13.05%  63.425M           20.366M     9.659B            N/A  
-    3    +2.20%  83.478M           61.033M     2.672T          26.91  
-    4    +6.73%  54.429M           45.726M     9.784B            N/A  
-    ..      ...      ...               ...        ...            ...  
-    95   +2.40%  12.962M            22.85M   124.391B            N/A  
-    96  +12.68%  11.912M            3.791M    48.086B            N/A  
-    97   -4.89%  11.027M            4.114M     9.385B            N/A  
-    98   +0.55%  10.284M           15.369M    21.486B          11.40  
-    99   +1.27%  12.545M           15.149M    70.064B          16.87  
-    
-    [100 rows x 9 columns]
-       Symbol                          Name Price (Intraday)  Change % Change  \
-    1    TSLA                   Tesla, Inc.           180.01   +0.02   +0.01%   
-    3    AAPL                    Apple Inc.           173.03   +3.73   +2.20%   
-    6     AMD  Advanced Micro Devices, Inc.           146.16   +1.89   +1.31%   
-    7    AMZN              Amazon.com, Inc.           184.72   +5.72   +3.20%   
-    12   NVDA            NVIDIA Corporation           858.17  +27.76   +3.34%   
-    32  GOOGL                 Alphabet Inc.           166.62   +2.76   +1.68%   
-    36   SBUX         Starbucks Corporation            74.93   +0.49   +0.66%   
-    47   PINS               Pinterest, Inc.            40.50   +0.02   +0.05%   
-    59   UBER       Uber Technologies, Inc.            68.57   +0.78   +1.15%   
-    66   CSCO           Cisco Systems, Inc.            46.79   -0.05   -0.11%   
-    70    LUV        Southwest Airlines Co.            26.41   +0.74   +2.88%   
-    75     SQ                   Block, Inc.            70.30   +3.46   +5.18%   
-    81   MSFT         Microsoft Corporation           397.84   +2.90   +0.73%   
-    
-         Volume Avg Vol (3 month) Market Cap PE Ratio (TTM)  
-    1   88.285M          103.076M   574.088B          46.04  
-    3   83.478M           61.033M     2.672T          26.91  
-    6   49.775M           64.875M   236.215B         211.83  
-    7   53.093M           42.046M     1.922T          51.89  
-    12  36.306M           54.083M     2.145T          71.75  
-    32  23.081M           31.316M     2.069T          25.56  
-    36  23.505M            8.899M    84.873B          20.64  
-    47  20.653M           10.422M    27.668B         184.09  
-    59  18.138M           19.176M   142.731B          78.82  
-    66  14.872M           19.562M   189.462B          14.22  
-    70  14.617M            9.073M    15.805B          41.27  
-    75  14.821M            9.716M    43.469B       3,515.00  
-    81  17.384M           20.917M     2.957T          34.50  
-    
-    
-
-   
-
-    
-    
+#### After getting the file we can load the this dataset into our database and we can repeat the machine learning the steps to predict the stock market prices.
 
 
   
