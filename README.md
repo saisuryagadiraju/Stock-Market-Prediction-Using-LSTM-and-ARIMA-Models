@@ -1,4 +1,14 @@
-# AIT-Final-Project-Sai-Surya-Gadiraju-Team-3
+# AIT 614 sec 002 Final-Project-Sai-Surya-Gadiraju-Team-3
+
+Team-3
+----
+Sai Surya Gadiraju
+Siddhant Mehta
+Satya Sai Varun Chidagam
+Ishan Patel
+Sagarika Komati Reddy
+----
+
 
 ## Expolatory Data Analysis
 
@@ -1754,14 +1764,162 @@ display(filtered_df)
 ```
 #### MOdel was trained for 3 months 
 
+Date Range Definition
 
+Two string variables, start_date and end_date, specify the start and end dates for the filter. The format used is YYYY-MM-DD.
+```
+start_date = '2023-06-20'
+end_date = '2023-09-20'
+Filtering the DataFrame
+```
+The code filters a DataFrame, filtered_df, for rows where the 'Date' column is within the specified date range. The condition for this is created using a Boolean expression with & to combine two separate conditions.
+```
+date_filtered_df = filtered_df[(filtered_df['Date'] >= start_date) & (filtered_df['Date'] <= end_date)]
+Display the Resulting DataFrame
+```
+The filtered DataFrame, date_filtered_df, is displayed using the display() function. This function is typically used in Jupyter Notebooks or interactive environments.
+```
+display(date_filtered_df)
+```
 
+The rand function from pyspark.sql.functions is imported to create random values.
+```
+from pyspark.sql.functions import rand
+```
+Add a Random Column
 
+A new column named "rand" is added to filtered_df. This column contains random values, generated using rand(). This additional column will be used to determine whether a given row belongs to the training or test set.
+```
+df_with_rand = filtered_df.withColumn("rand", rand())
+```
+Split the Data
 
+The train_df1 DataFrame is created by selecting rows where the "rand" value is less than 0.8. This typically results in 80% of the data being allocated to training.
+The test_df1 DataFrame is created by selecting rows where the "rand" value is 0.8 or higher, allocating about 20% to the test set.
+```
+train_df1 = df_with_rand.filter(df_with_rand['rand'] < 0.8)
+test_df1 = df_with_rand.filter(df_with_rand['rand'] >= 0.8)
+```
+Remove the Random Column
+The temporary "rand" column is dropped from both train_df1 and test_df1. This step is essential for cleaning the data before further processing or analysis.
+```
+train_df1 = train_df1.drop("rand")
+test_df1 = train_df1.drop("rand")
+```
 
+Feature Vectorization
 
+Creating Feature Vectors
 
+To prepare the data for machine learning, it is common to convert multiple columns into a single feature vector. This step is done using VectorAssembler.
 
+The create_vector_if_needed function ensures that the feature vector column is created if it doesn't already exist in the DataFrame.
+```
+def create_vector_if_needed(df, inputCols, outputCol):
+    if outputCol in df.columns:
+        print(f"Column {outputCol} already exists. Using existing column.")
+        return df
+    else:
+        assembler = VectorAssembler(inputCols=inputCols, outputCol=outputCol)
+        return assembler.transform(df)
+```
+Applying Feature Vectorization
+The train_df1 and test_df1 DataFrames are transformed to include a feature vector named "features2", which combines the "Open", "High", "Low", and "Volume" columns.
+```
+train_df1 = create_vector_if_needed(train_df1, ["Open", "High", "Low", "Volume"], "features2")
+test_df1 = create_vector_if_needed(test_df1, ["Open", "High", "Low", "Volume"], "features2")
+```
+Feature Scaling
+
+Scaling the Features
+
+The MinMaxScaler is used to scale the feature vector to a range of 0 to 1. This normalization is helpful for models like linear regression, where feature scales can impact the training process.
+
+A Pipeline is created with the scaler, allowing for consistent transformation on the training and test DataFrames.
+```
+scaler = MinMaxScaler(inputCol="features2", outputCol="scaledFeatures2")
+pipeline = Pipeline(stages=[scaler])
+
+pipelineModel = pipeline.fit(train_df1)
+train_df1 = pipelineModel.transform(train_df1)
+test_df1 = pipelineModel.transform(test_df1)
+```
+3. Linear Regression
+
+Building and Fitting the Linear Regression Model
+
+A LinearRegression model is defined, using the "scaledFeatures2" column as features and "Close" as the label (target).
+
+The model is fitted using the training DataFrame.
+```
+lr1 = LinearRegression(featuresCol='scaledFeatures2', labelCol='Close')
+lr_model1 = lr1.fit(train_df1)
+```
+5. Model Predictions and Output
+Making Predictions
+
+The trained linear regression model is used to make predictions on the test DataFrame.
+The resulting DataFrame includes a "Prediction" column with the predicted values.
+```
+predictions1 = lr_model1.transform(test_df1)
+```
+Displaying the Results
+The select() method is used to show a few rows from the predictions, along with the "Close" (actual target values) and "scaledFeatures2" (scaled features) columns.
+```
+predictions1.select("Prediction", "Close", "scaledFeatures2").show(5)
+```
+Assemble Feature Vector
+A VectorAssembler is used to create a feature vector from specified columns ("Open", "High", "Low", "Volume"). The feature vector is named "features".
+The transformation is applied to both train_df and test_df.
+```
+assembler = VectorAssembler(inputCols=["Open", "High", "Low", "Volume"], outputCol="features")
+train_df = assembler.transform(train_df)
+test_df = assembler.transform(test_df)
+```
+Model Training
+Linear Regression
+A LinearRegression model is defined, with "features" as the input features and "Close" as the target label.
+The model is trained using train_df.
+```
+lr = LinearRegression(featuresCol='features', labelCol='Close')
+model = lr.fit(train_df)
+```
+Model Predictions
+Make Predictions
+Once trained, the linear regression model is used to make predictions on test_df.
+```
+predictions = model.transform(test_df)
+```
+Model Evaluation
+Evaluate the Model
+RegressionEvaluator is used to calculate three metrics: R², RMSE, and MSE.
+R² measures the proportion of variance explained by the model.
+RMSE quantifies the model's error in the same units as the data.
+MSE measures the average squared error, indicating the accuracy of predictions.
+```
+evaluatorR2 = RegressionEvaluator(predictionCol="prediction", labelCol="Close", metricName="r2")
+r2 = evaluatorR2.evaluate(predictions)
+evaluatorRMSE = RegressionEvaluator(predictionCol="prediction", labelCol="Close", metricName="rmse")
+rmse = evaluatorRMSE.evaluate(predictions)
+evaluatorMSE = RegressionEvaluator(predictionCol="prediction", labelCol="Close", metricName="mse")
+mse = evaluatorMSE.evaluate(predictions)
+```
+Exception Handling
+Try-Except Block
+The entire function is wrapped in a try-except block to catch and handle exceptions. If an error occurs, an error message is printed, and the function returns None for each metric to indicate failure.
+```
+try:
+    # Code for training and evaluation
+    
+except Exception as e:
+    print("Error in train_and_evaluate:", e)
+    return None, None, None
+Return Values
+```
+The function returns the calculated metrics: r2, rmse, and mse. These can be used to gauge the effectiveness and accuracy of the trained linear regression model.
+```
+return r2, rmse, mse
+```
 
 
 
@@ -1918,6 +2076,7 @@ filtered_df.to_csv('Final_Filtered_Web_Scrapping.csv', index=False)
 print(filtered_df)
 
 * After getting the file we can load the this dataset into our database and we can repeat the machine learning the steps to predict the stock market prices.
+![image](https://github.com/saisuryagadiraju/AIT-Final-Project-Sai-Surya-Gadiraju/assets/155181311/a815aa63-6bee-487f-bd06-a8c3106c6a19)
 
 
   
