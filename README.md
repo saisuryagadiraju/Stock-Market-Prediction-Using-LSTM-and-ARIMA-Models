@@ -3,10 +3,15 @@
 Team-3
 ----
 Sai Surya Gadiraju
+
 Siddhant Mehta
+
 Satya Sai Varun Chidagam
+
 Ishan Patel
+
 Sagarika Komati Reddy
+
 ----
 
 
@@ -504,7 +509,9 @@ verbose=1: Controls the amount of information displayed during training (1 provi
 The model.fit() method returns a history object that contains information about the training process, including the loss for each epoch.
 
 #### Extracting Training and Validation Loss
-After training, the code extracts the training loss and validation loss from the history object. This data is used to plot the loss over epochs to evaluate the training process.
+After training, the code extracts the training loss and validation loss from the history object. 
+
+This data is used to plot the loss over epochs to evaluate the training process.
 
 ```
 loss = history.history['loss']
@@ -546,9 +553,13 @@ def create_lstm_model(lstm_units, dropout_rate):
     return model
 ```
 The LSTM model has two layers, with the first layer using the specified lstm_units and the second layer having half as many units.
+
 The Dropout layers use the specified dropout_rate to reduce overfitting.
+
 The Dense layer outputs 4 values, corresponding to Open, Close, High, and Low stock prices.
+
 The model is compiled with the Adam optimizer and MSE loss function.
+
 
 ### Iterating Over Hyperparameters and Training the Model
 The code iterates over the hyperparameter grid and trains an LSTM model for each combination of lstm_units, dropout_rate, and batch_size.
@@ -621,9 +632,13 @@ print("Root Mean Squared Error (RMSE):", rmse)
 print("Mean Absolute Error (MAE):", mae)
 ```
 The predictions are generated from the best model using the test data.
+
 mean_squared_error calculates MSE between the actual and predicted values.
+
 np.sqrt(mse) calculates RMSE, providing a more interpretable measure of error.
+
 mean_absolute_error computes MAE, indicating the average absolute error in the predictions.
+
 The results for MSE, RMSE, and MAE are displayed to evaluate the model's accuracy.
 
 ![image](https://github.com/saisuryagadiraju/AIT-Final-Project-Sai-Surya-Gadiraju/assets/155181311/f1e214a8-1802-4990-af5e-673a956902e6)
@@ -695,7 +710,8 @@ def build_model(input_shape):
     model.compile(optimizer='adam', loss='mean_squared_error')
     return model
 ````
-LSTM Layers: The first LSTM layer has 15 units with return_sequences=True, and the second has 50 units.
+
+### LSTM Layers: The first LSTM layer has 15 units with return_sequences=True, and the second has 50 units.
 
 Dropout: Dropout is applied after each LSTM layer to reduce overfitting.
 Dense Layer: The dense layer outputs predictions for 7 days, each with 4 features (Open, High, Low, Close).
@@ -756,7 +772,9 @@ model_checkpoint = ModelCheckpoint(
     save_best_only=True
 )
 Filepath: The file path to save the best model.
+
 Monitor: The monitored metric is 'val_loss'.
+
 Save Best Only: Saves only the best model based on validation loss.
 
 ```
@@ -1066,19 +1084,23 @@ reshape(): Reshapes the predictions to match the expected output format.
 
 #### Generating Future Dates
 The code creates a range of future dates to associate with the predicted prices. This allows you to assign a date to each prediction.
+
 ```
 # Generate future dates
 today = pd.Timestamp('today').normalize()
+
 date_range = pd.date_range(start=today, periods=7, freq='D')
+
 pd.Timestamp('today').normalize(): Creates a timestamp for today's date, normalized to remove the time component.
+
 pd.date_range(start=today, periods=7, freq='D'): Creates a range of 7 days starting from today, with a frequency of one day ('D').
 ```
 
 #### Storing Predictions in a DataFrame
 The code creates a list of prediction dictionaries, associating each predicted price with the corresponding stock ticker and date. This list is then converted to a DataFrame for easier handling and visualization.
-
+# 
 ```
-# Prepare and store predictions
+Prepare and store predictions
 for i in range(7):
     all_predictions.append({
         'Date': date_range[i],
@@ -1088,12 +1110,16 @@ for i in range(7):
         'High': predicted_prices[0, i, 2],
         'Close': predicted_prices[0, i, 3]
     })
+ ```   
+#
 ```
-# 
 Convert the list of predictions to a DataFrame
 predictions_df = pd.DataFrame(all_predictions)
 ```
+#
+
 all_predictions.append(): Adds a new dictionary to the list of predictions, containing the date, stock ticker, and predicted 'Open', 'Low', 'High', and 'Close' prices for the first day of the forecast period.
+```
 pd.DataFrame(all_predictions): Converts the list of predictions into a DataFrame, allowing for easier handling, analysis, or export.
 ```
 Displaying the Predictions DataFrame
@@ -1101,24 +1127,28 @@ Finally, the code displays the DataFrame containing all the predictions to provi
 
 #
 
+# ARIMA
+## This README file provides an explanation of the code used to forecast stock prices for specific tickers using the ARIMA (AutoRegressive Integrated Moving Average) model. The project imports historical stock price data, scales the data, fits ARIMA models to predict future prices, and saves the forecast results to a CSV file.
 
-#
-This README file provides an explanation of the code used to forecast stock prices for specific tickers using the ARIMA (AutoRegressive Integrated Moving Average) model. The project imports historical stock price data, scales the data, fits ARIMA models to predict future prices, and saves the forecast results to a CSV file.
 
-
-# Introduction
+## Introduction
 This project aims to forecast stock prices for specific companies over a given period using the ARIMA model. The predictions are made for a week ahead, based on existing stock price data.
 
-# Dependencies
+## Dependencies
 The following Python libraries are used in this project:
 
 #
 ```
 import pandas as pd
+
 import numpy as np
+
 from sklearn.preprocessing import MinMaxScaler
+
 from statsmodels.tsa.arima.model import ARIMA
+
 from datetime import datetime, timedelta
+
 import matplotlib.pyplot as plt
 ```
 #
@@ -1135,7 +1165,7 @@ datetime: For working with dates and times.
 These packages are installed in your Python environment before running the code.
 #
 
-# Dataset
+## Dataset
 The code loads historical stock price data from a CSV file named World_Stock_Prices.csv. 
 
 It contains various stock tickers along with corresponding price data (Open, Close, High, Low).
@@ -1155,18 +1185,19 @@ stock_data = pd.read_csv("World_Stock_Prices.csv")
 stock_data['Date'] = pd.to_datetime(stock_data['Date'])
 ```
 ## declaring the numeric_cols df
+
 ```
 # Convert relevant columns to numeric
 numeric_cols = ['Open', 'High', 'Low', 'Close']
 stock_data[numeric_cols] = stock_data[numeric_cols].astype(float)
-
+```
+#
+```
 # Find the top 10 stocks with the highest closing prices
 latest_closes = stock_data.groupby('Ticker')['Close'].max()
 top_10_stocks = latest_closes.nlargest(10)
 print(top_10_stocks)
 ```
-#
-
 
 ##Libraries and Dependencies for the Scaling
 
@@ -1892,9 +1923,13 @@ predictions = model.transform(test_df)
 ```
 Model Evaluation
 Evaluate the Model
+
 RegressionEvaluator is used to calculate three metrics: R², RMSE, and MSE.
+
 R² measures the proportion of variance explained by the model.
+
 RMSE quantifies the model's error in the same units as the data.
+
 MSE measures the average squared error, indicating the accuracy of predictions.
 ```
 evaluatorR2 = RegressionEvaluator(predictionCol="prediction", labelCol="Close", metricName="r2")
@@ -1905,7 +1940,9 @@ evaluatorMSE = RegressionEvaluator(predictionCol="prediction", labelCol="Close",
 mse = evaluatorMSE.evaluate(predictions)
 ```
 Exception Handling
+
 Try-Except Block
+
 The entire function is wrapped in a try-except block to catch and handle exceptions. If an error occurs, an error message is printed, and the function returns None for each metric to indicate failure.
 ```
 try:
@@ -1920,21 +1957,7 @@ The function returns the calculated metrics: r2, rmse, and mse. These can be use
 ```
 return r2, rmse, mse
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+![image](https://github.com/saisuryagadiraju/AIT-Final-Project-Sai-Surya-Gadiraju/assets/155181311/7e2f4825-08c5-472a-a428-f653562824ec)
 
 
 
@@ -2076,7 +2099,9 @@ filtered_df.to_csv('Final_Filtered_Web_Scrapping.csv', index=False)
 print(filtered_df)
 
 * After getting the file we can load the this dataset into our database and we can repeat the machine learning the steps to predict the stock market prices.
-![image](https://github.com/saisuryagadiraju/AIT-Final-Project-Sai-Surya-Gadiraju/assets/155181311/a815aa63-6bee-487f-bd06-a8c3106c6a19)
+* We can also send this real time data to the Data base by using Mongo DB API call to store the data and further analaysis.
+![image](https://github.com/saisuryagadiraju/AIT-Final-Project-Sai-Surya-Gadiraju/assets/155181311/e78bc49a-2fc1-4c74-a8b5-24b9691ffff8)
+
 
 
   
