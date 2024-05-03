@@ -1295,21 +1295,19 @@ Print the prediction whether the price will go up or down.
 * Plot the importance of features using permutation importance.
 * Visualize feature importance scores for the SVM model.
 
-## Example Usage
+#### Example Usage
 
 1. Specify the top company symbols in the `top_companies` list.
 
 2. Run the script to train SVM models, evaluate performance, and visualize results.
 
-```
+
 python svm_stock_prediction.py
 import pandas as pd
 stock_data=pd.read_csv("C:/Users/HP/Downloads/World_Stock_Prices 1.csv")
 stock_data.head()
 stock_data.info()
-```
-#
-```
+
 
     <class 'pandas.core.frame.DataFrame'>
     RangeIndex: 279753 entries, 0 to 279752
@@ -1330,13 +1328,10 @@ stock_data.info()
      11  Country       279753 non-null  object 
     dtypes: float64(6), int64(1), object(5)
     memory usage: 25.6+ MB
-```
-#
-```
+
+
 stock_data.describe()
 
-```
-#
 
 ```
 ##SVM MODEL
