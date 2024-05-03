@@ -954,7 +954,142 @@ After training, the code saves the final model to a specified path. This ensures
 final_model_path: Defines the file path for the final model, ensuring it includes the stock ticker's name for uniqueness.
 
 model.save(final_model_path): Saves the trained model to the specified file path. This includes the model's architecture, weights, and optimizer state.
+#
 
+### Loading the Trained Model
+The code starts by loading a pre-trained model from a specified file path. This is usually done to make predictions or continue training.
+
+```
+from tensorflow.keras.models import load_model
+# Load the trained model
+model = load_model(f'models/{ticker}_best_model.keras')
+```
+
+load_model(): This function loads a saved Keras model, allowing you to use it for inference or further training.
+
+f'models/{ticker}_best_model.keras': The file path to the saved model. Using f-string formatting, the code references the correct model for the given stock ticker.
+#
+
+### Predicting with the LSTM Model
+After loading the model, the code predicts stock prices using the prepared input data. This step generates the model's output based on the input sequences.
+
+```
+# Predict using the prepared input data
+predicted = model.predict(input_data)
+```
+
+model.predict(input_data): Generates predictions from the input data. This produces an array of predictions based on the trained model's architecture and learned weights.
+The input_data variable represents the input sequences for the LSTM model. These should be prepared in a way that matches the model's expected input shape and structure.
+#
+### Transforming Predictions to Original Scale
+The predicted values are typically normalized or scaled to a consistent range during preprocessing. To understand the predictions in their original context, they must be transformed back to the original scale using the appropriate scaler.
+
+```
+# Inverse transform the predicted values to the original scale
+predicted_prices = scalers[ticker].inverse_transform(predicted.reshape(-1, 4)).reshape(predicted.shape)
+
+```
+scalers[ticker]: This is the specific scaler used to normalize the data during preprocessing. By referencing the correct scaler, the code can accurately transform the predictions back to their original scale.
+predicted.reshape(-1, 4): This reshapes the predictions to a two-dimensional format, suitable for inverse transformation. The -1 keeps the number of rows consistent, while 4 represents the number of features (Open, High, Low, Close).
+
+
+scalers[ticker].inverse_transform(): This method reverses the scaling, transforming the predictions back to the original scale.
+
+reshape(predicted.shape): Reshapes the predictions to their original three-dimensional format after the inverse transformation.
+
+### Creating a DataFrame for All Predictions
+An empty list is created to store predictions from all unique stock tickers. This will be converted to a DataFrame at the end for easier handling and visualization.
+
+
+```
+# Create a DataFrame to store all predictions
+all_predictions = []
+
+```
+#
+
+### Looping Over Unique Tickers
+The code loops over each unique stock ticker, loads the corresponding model, and generates predictions.
+
+```
+for ticker in unique_tickers:
+    # Define the path to the best model
+    model_path = f'models/{ticker}_best_model.keras'
+
+    # Check if the model file exists
+    if not os.path.isfile(model_path):
+        print(f"No model found for {ticker}, skipping.")
+        continue
+
+    # Load the saved model
+    model = load_model(model_path)
+```
+model_path: The file path to the saved model for the current stock ticker. This should point to the best model obtained during training.
+os.path.isfile(model_path): Checks if the model file exists. If it doesn't, the loop skips this ticker to avoid errors.
+load_model(): Loads the model from the specified file path.
+
+### Preparing Input Data
+To generate predictions, the code prepares the input data for the LSTM model. This typically involves creating a dataset with the appropriate look-back period.
+
+```
+#### Prepare input data for the model
+input_data = prepare_input_data(ticker, stock_data, look_back=100) 
+```
+prepare_input_data(ticker, stock_data, look_back=100): This function (not defined in the snippet) is assumed to create the required input data for the model, with a specific look-back period.
+look_back=100: Specifies the number of past days used to generate predictions. Ensure this matches the configuration used during model training.
+Predicting Future Prices
+Using the prepared input data, the code predicts future stock prices for the specified stock ticker. The predictions are then transformed back to the original scale using the appropriate scaler.
+
+```
+# Predict future prices
+predicted = model.predict(input_data)
+```
+
+#### Inverse transform the predictions to the original scale
+```
+predicted_prices = scalers[ticker].inverse_transform(predicted.reshape(-1, 4)).reshape(predicted.shape)
+```
+model.predict(input_data): Generates predictions from the LSTM model using the prepared input data.
+scalers[ticker].inverse_transform(): This step reverses the scaling applied during preprocessing, transforming the predictions back to the original scale. This ensures the predictions are in the same units as the original data.
+reshape(): Reshapes the predictions to match the expected output format.
+#
+
+#### Generating Future Dates
+The code creates a range of future dates to associate with the predicted prices. This allows you to assign a date to each prediction.
+```
+# Generate future dates
+today = pd.Timestamp('today').normalize()
+date_range = pd.date_range(start=today, periods=7, freq='D')
+pd.Timestamp('today').normalize(): Creates a timestamp for today's date, normalized to remove the time component.
+pd.date_range(start=today, periods=7, freq='D'): Creates a range of 7 days starting from today, with a frequency of one day ('D').
+```
+
+#### Storing Predictions in a DataFrame
+The code creates a list of prediction dictionaries, associating each predicted price with the corresponding stock ticker and date. This list is then converted to a DataFrame for easier handling and visualization.
+
+```
+# Prepare and store predictions
+for i in range(7):
+    all_predictions.append({
+        'Date': date_range[i],
+        'Ticker': ticker,
+        'Open': predicted_prices[0, i, 0],
+        'Low': predicted_prices[0, i, 1],
+        'High': predicted_prices[0, i, 2],
+        'Close': predicted_prices[0, i, 3]
+    })
+```
+# 
+Convert the list of predictions to a DataFrame
+predictions_df = pd.DataFrame(all_predictions)
+```
+all_predictions.append(): Adds a new dictionary to the list of predictions, containing the date, stock ticker, and predicted 'Open', 'Low', 'High', and 'Close' prices for the first day of the forecast period.
+pd.DataFrame(all_predictions): Converts the list of predictions into a DataFrame, allowing for easier handling, analysis, or export.
+```
+Displaying the Predictions DataFrame
+Finally, the code displays the DataFrame containing all the predictions to provide a comprehensive view of the results.
+
+#
 
 
 #
@@ -1603,6 +1738,47 @@ for company_symbol in top_companies:
     weighted avg       0.81      0.81      0.81       238
 
 #
+
+
+## Linear Regression 
+
+* performing the linear regression on only selected top most companies
+
+```
+# Filter the DataFrame for the specific brands
+filtered_df = df.filter(df['Brand_Name'].isin('nike', 'amazon', 'apple', 'costco', 'honda'))
+
+# Show some of the filtered data to verify
+filtered_df.show()
+display(filtered_df)
+```
+#### MOdel was trained for 3 months 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## Web Scraping technique Yahoo Finance Most Active Stocks
 
