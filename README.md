@@ -16,8 +16,11 @@ Sagarika Komati Reddy
 
 ### This Read.me file report contains Analysis Explaination on Data Driven Stock Market Prediction using Machine Learning Models such as LSTM with Hyperparameter tuning, LSTM futhure stocks price prediction, ARIMA Model for the future stock prices forecasting, Support Vector Machine, Linear Regression, 
 
+#### Link: https://www.kaggle.com/datasets/nelgiriyewithana/world-stock-prices-daily-updating
+
 ### For this we use Databricks, Jupyter, Tableau for visulizations
 
+#### If you are using the Databricks create the ML version cluster, import the dataset into the DBFS path, For Jupyter create a new folder and upload the dataset and create a python file and follow the steps as below.
 
 ## Expolatory Data Analysis
 
