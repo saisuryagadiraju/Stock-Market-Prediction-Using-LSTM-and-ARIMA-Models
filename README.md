@@ -14,18 +14,22 @@ Sagarika Komati Reddy
 
 ----
 
+### This Read.me file report contains Analysis Explaination on Data Driven Stock Market Prediction using Machine Learning Models such as LSTM with Hyperparameter tuning, LSTM futhure stocks price prediction, ARIMA Model for the future stock prices forecasting, Support Vector Machine, Linear Regression, 
+
+### For this we use Databricks, Jupyter, Tableau for visulizations
+
 
 ## Expolatory Data Analysis
 
 The exploratory data analysis (EDA) performed on a dataset of world stock prices. The EDA aims to understand the dataset's structure, summarize key characteristics, and identify trends in stock prices by country and industry.
 
 ### Table of Contents
-Data Loading
-Initial Data Exploration
-Data Conversion and Cleaning
-Industry-Level Analysis
-Country-Level Analysis and Visualization
-Results and Observations
+* Data Loading
+* Initial Data Exploration
+* Data Conversion and Cleaning
+* Industry-Level Analysis
+* Country-Level Analysis and Visualization
+* Results and Observations
 
 ## Data Loading
 The first step is to load the dataset and ensure it has been imported correctly. The data is loaded into a Pandas DataFrame from a CSV file named "World_Stock_Prices.csv".
@@ -421,9 +425,13 @@ model.compile(optimizer='adam', loss='mse')
 ```
 
 The LSTM model has two LSTM layers: the first with 100 units, returning sequences, and the second with 50 units.
+
 Dropout is used after each LSTM layer to reduce overfitting.
+
 The model ends with a Dense layer with 4 outputs (predicting 'Open', 'Close', 'High', and 'Low').
+
 The model is compiled with the Adam optimizer and Mean Squared Error (MSE) loss function.
+
 The code trains the LSTM model using the training data and includes a validation split for monitoring during training.
 
 ```
@@ -498,15 +506,14 @@ MAE is interpreted as the average absolute difference between predicted and actu
 
 The first step is to train the LSTM model using the training data (X_train, y_train). The validation_split parameter allows monitoring the model's performance on a subset of the training data not used for actual training, which provides a measure of how well the model generalizes to unseen data.
 
-python
-Download
-Copy code
+```
 history = model.fit(X_train, y_train, epochs=10, batch_size=50, validation_split=0.1, verbose=1)
 epochs=10: Specifies that the model will be trained for 10 epochs (iterations through the entire training dataset).
 batch_size=50: Defines the number of samples processed before updating the model weights.
 validation_split=0.1: Uses 10% of the training data for validation to monitor the model's performance during training.
 verbose=1: Controls the amount of information displayed during training (1 provides detailed output).
 The model.fit() method returns a history object that contains information about the training process, including the loss for each epoch.
+```
 
 #### Extracting Training and Validation Loss
 After training, the code extracts the training loss and validation loss from the history object. 
@@ -518,10 +525,14 @@ loss = history.history['loss']
 val_loss = history.history['val_loss']
 ```
 loss: The training loss for each epoch.
-val_loss: The validation loss for each epoch.
-Loss typically refers to the value of the loss function (in this case, Mean Squared Error), which is used to measure how well the model is learning.
 
-### Hyperparameter Tuning with a Parameter Grid
+val_loss: The validation loss for each epoch.
+
+Loss typically refers to the value of the loss function (in this case, Mean Squared Error), which is used to measure how well the model is learning.
+#
+
+## Hyperparameter Tuning with a Parameter Grid
+
 The code defines a grid of hyperparameters to iterate over, allowing you to find the optimal combination for the LSTM model.
 
 ```
@@ -531,9 +542,14 @@ param_grid = {
     'batch_size': [32, 64]
 }
 ```
+#
+
 The grid includes possible values for:
+
 lstm_units: Number of units in the LSTM layer.
+
 dropout_rate: Fraction of the units to drop during training (prevents overfitting).
+
 batch_size: Number of samples processed at a time during training.
 
 
@@ -552,6 +568,8 @@ def create_lstm_model(lstm_units, dropout_rate):
     model.compile(optimizer='adam', loss='mse')
     return model
 ```
+# 
+
 The LSTM model has two layers, with the first layer using the specified lstm_units and the second layer having half as many units.
 
 The Dropout layers use the specified dropout_rate to reduce overfitting.
@@ -562,6 +580,7 @@ The model is compiled with the Adam optimizer and MSE loss function.
 
 
 ### Iterating Over Hyperparameters and Training the Model
+
 The code iterates over the hyperparameter grid and trains an LSTM model for each combination of lstm_units, dropout_rate, and batch_size.
 
 ```
@@ -645,7 +664,7 @@ The results for MSE, RMSE, and MAE are displayed to evaluate the model's accurac
 
 #
 
-This LSTM Predicton Analysis was done in Jupyter instead of Databricks to avoid the complexity to store the files in the local host (local computer)
+## This LSTM Predicton Analysis was done in Jupyter instead of Databricks to avoid the complexity to store the files in the local host (local computer)
 #
 
 ### Creating Multivariable Datasets
@@ -694,7 +713,7 @@ Save Datasets: Saves the generated X and y datasets to files for later use.
 
 The code defines a function to build the LSTM model and then trains a separate model for each stock ticker using the saved datasets.
 
-Building the LSTM Model
+## Building the LSTM Model
 The model is built with two LSTM layers, dropout to prevent overfitting, and a dense layer for the output.
 
 ```
@@ -826,6 +845,7 @@ Saving all datasets: The code saves X_train, X_test, y_train, and y_test to sepa
 
 
 ### Evaluating Training Loss Before Further Training
+
 The code evaluates the training loss of the loaded model on the training dataset before any additional training. This is useful to understand the model's initial state and performance.
 
 ```
@@ -991,8 +1011,8 @@ The code starts by loading a pre-trained model from a specified file path. This 
 from tensorflow.keras.models import load_model
 # Load the trained model
 model = load_model(f'models/{ticker}_best_model.keras')
-```
 
+```
 load_model(): This function loads a saved Keras model, allowing you to use it for inference or further training.
 
 f'models/{ticker}_best_model.keras': The file path to the saved model. Using f-string formatting, the code references the correct model for the given stock ticker.
@@ -1015,9 +1035,10 @@ The predicted values are typically normalized or scaled to a consistent range du
 ```
 # Inverse transform the predicted values to the original scale
 predicted_prices = scalers[ticker].inverse_transform(predicted.reshape(-1, 4)).reshape(predicted.shape)
-
 ```
-scalers[ticker]: This is the specific scaler used to normalize the data during preprocessing. By referencing the correct scaler, the code can accurately transform the predictions back to their original scale.
+
+scalers[ticker]: This is the specific scaler used to normalize the data during preprocessing.
+By referencing the correct scaler, the code can accurately transform the predictions back to their original scale.
 predicted.reshape(-1, 4): This reshapes the predictions to a two-dimensional format, suitable for inverse transformation. The -1 keeps the number of rows consistent, while 4 represents the number of features (Open, High, Low, Close).
 
 
@@ -1032,7 +1053,6 @@ An empty list is created to store predictions from all unique stock tickers. Thi
 ```
 # Create a DataFrame to store all predictions
 all_predictions = []
-
 ```
 #
 
@@ -1400,9 +1420,8 @@ for ticker, forecast_df in ticker_forecasts.items():
 
 
 #
-#
 
-## SVM Model for Stock Price Prediction
+##  SVM Model for Stock Price Prediction
 
 This Python script utilizes Support Vector Machine (SVM) models to predict stock price movements and analyze stock data.
 It employs the `yfinance` library to fetch historical stock data and `scikit-learn` for SVM model training and evaluation.
@@ -2101,6 +2120,15 @@ print(filtered_df)
 * After getting the file we can load the this dataset into our database and we can repeat the machine learning the steps to predict the stock market prices.
 * We can also send this real time data to the Data base by using Mongo DB API call to store the data and further analaysis.
 ![image](https://github.com/saisuryagadiraju/AIT-Final-Project-Sai-Surya-Gadiraju/assets/155181311/e78bc49a-2fc1-4c74-a8b5-24b9691ffff8)
+
+
+## Conclusion:
+#
+
+### Results:
+#### Best Results we got from the LSTM model 
+![image](https://github.com/saisuryagadiraju/AIT-Final-Project-Sai-Surya-Gadiraju/assets/155181311/34da5075-145d-46a3-839f-444f38c19138)
+
 
 
 
