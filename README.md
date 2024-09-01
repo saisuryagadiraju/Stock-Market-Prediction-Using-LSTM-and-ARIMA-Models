@@ -1,16 +1,10 @@
-# AIT 614 sec 002 Final-Project-Sai-Surya-Gadiraju-Team-3
+# 
 
-Team-3
+Stock Market Prediction using the LSTM Algorithm 
 ----
 Sai Surya Gadiraju
 
-Siddhant Mehta
 
-Satya Sai Varun Chidagam
-
-Ishan Patel
-
-Sagarika Komati Reddy
 
 ----
 
