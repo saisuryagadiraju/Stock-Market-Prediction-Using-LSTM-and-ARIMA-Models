@@ -1,4 +1,4 @@
-# AIT-Final-Project-Sai-Surya-Gadiraju-Team-3
+# Stock Market Prediction Project-Sai-Surya-Gadiraju
 
 ### This README file provides an explanation of the code used to forecast stock prices for specific tickers using the ARIMA (AutoRegressive Integrated Moving Average) model. The project imports historical stock price data, scales the data, fits ARIMA models to predict future prices, and saves the forecast results to a CSV file.
 
